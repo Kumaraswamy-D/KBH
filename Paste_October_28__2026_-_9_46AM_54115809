@@ -1,0 +1,828 @@
+# KALPATARU BOYS HOSTEL MANAGEMENT SYSTEM
+## Complete Full-Stack Application Development Prompt for Google AI Studio
+
+### 1. Project Overview
+
+Build a complete, functional, responsive web application called **Kalpataru Boys Hostel Management System** for managing hostel students, room allocation, hostel fees, mess fees, online and manual payments, complaints, and SMS reminders.
+
+This must be a real full-stack application, not a static design or demo with fake data.
+
+Use Google AI Studio to develop the application. Use Firebase Authentication for user authentication, Cloud Firestore for database storage, Firebase Storage for profile photos and complaint attachments, and secure server-side logic using Firebase Cloud Functions or another suitable trusted backend.
+
+Integrate a legitimate payment gateway for online payments and an SMS provider for actual SMS reminders. Keep all secret API keys on the server.
+
+The system must have two separate portals:
+1. Student Portal
+2. Administrator Portal
+
+Both portals must use the same database with strict role-based access control.
+
+---
+
+# 2. Registration and Login
+
+Create a professional welcome page with two options:
+
+- Student Login / Register
+- Administrator Login / Register
+
+Provide a separate registration and login form for each role.
+
+## 2.1 Student Registration
+
+Required fields:
+- Full name
+- Email address
+- Create password
+- Confirm password
+
+Requirements:
+- Validate all fields.
+- Confirm that both passwords match.
+- Prevent duplicate email registrations.
+- Use Firebase Authentication for secure account creation.
+- Never store plain-text passwords in Firestore.
+- After registration, redirect the student to the Student Dashboard or profile-completion page.
+- Allow the student to log in and log out securely.
+- Provide password reset functionality.
+
+## 2.2 Administrator Registration
+
+Required fields:
+- Full name
+- Email address
+- Create password
+- Confirm password
+- Administrator access key
+
+The application owner must configure an administrator access key securely on the backend before administrator registration is enabled.
+
+Rules:
+- The administrator access key must not be visible in frontend JavaScript, HTML, public configuration, or client-side environment variables.
+- Validate the key through a trusted backend function.
+- Never accept an administrator role simply because the client submits `admin` as a role.
+- Only a person with a valid administrator access key can register as an administrator.
+- Store the user's role securely and enforce it using backend authorization and database security rules.
+- Protect the key-validation endpoint against repeated guessing attempts.
+- Allow only authenticated and authorized administrators to access administrative features.
+
+After successful registration, the administrator can log in and access the Administrator Dashboard.
+
+Do not provide any public option that lets an ordinary student upgrade their own account to administrator.
+
+---
+
+# 3. Student Dashboard
+
+Create a separate dashboard for students.
+
+Use a left-side navigation sidebar on desktop and a mobile-friendly navigation menu on smaller screens.
+
+Menu items:
+1. Dashboard
+2. Profile
+3. Select Room
+4. Bills and Payments
+5. Complaints
+6. Notifications
+7. Logout
+
+Display the following on the home dashboard:
+- Welcome message with the student's name.
+- Student profile photo.
+- Academic year and branch.
+- Hostel block and allocated room number.
+- Roommate name and profile photo, where applicable.
+- Room fee summary.
+- Mess fee summary.
+- Total outstanding balance.
+- Recent payment history.
+- Recent complaints and their statuses.
+- Latest notifications and bill reminders.
+
+The dashboard must retrieve real data from the database.
+
+Only display information belonging to the authenticated student, except for explicitly permitted roommate information.
+
+---
+
+# 4. Student Profile Management
+
+Create a complete profile page with the following fields:
+
+- Full name
+- Email address
+- Mobile number
+- Profile photo
+- Academic year
+- Branch or department
+- Room allocation status
+- Hostel block
+- Room number
+
+Provide an **Edit Profile** button.
+
+Students can edit their permitted profile details and upload or change their profile photo.
+
+Requirements:
+- Validate all mandatory fields.
+- Store profile information in Firestore.
+- Store uploaded photos securely in Firebase Storage.
+- Show a clear save-success or error message.
+- Do not allow students to edit their assigned role, billing records, room occupancy records, or another student's profile.
+- Keep the email address synchronized with the authentication account when email changes are permitted.
+
+The following fields are mandatory before room selection:
+- Full name
+- Mobile number
+- Academic year
+- Branch
+- Profile photo, if required by the hostel administrator
+
+If any mandatory field is missing, show a message asking the student to complete their profile. Do not display room-selection options until the profile is complete.
+
+Academic year must be selected from predefined options:
+- First Year
+- Second Year
+- Third Year
+- Fourth Year
+
+Do not allow students to select arbitrary block assignments through their profile.
+
+---
+
+# 5. Administrator Room Management
+
+The administrator will create and maintain room numbers through the Administrator Dashboard.
+
+Create a Room Management page with these features:
+- Add a new room.
+- Edit room details.
+- Assign the room to a hostel block.
+- Enter the room number.
+- Set the maximum capacity to two students.
+- View occupied beds.
+- View available beds.
+- View assigned students.
+- Mark rooms unavailable when necessary.
+- Search and filter rooms.
+- Prevent duplicate room numbers within the same block.
+
+Hostel blocks and year assignments must follow these rules:
+
+| Academic year | Assigned hostel block |
+|---|---|
+| First Year | Hemavati Block |
+| Second Year | Kaveri Block |
+| Third Year | Kaveri Block |
+| Fourth Year | MCA Block |
+
+The administrator must be able to add rooms under the appropriate blocks.
+
+Do not invent actual room numbers. The administrator will enter the correct room numbers based on the real hostel layout.
+
+Each room can have a maximum of **two students only**.
+
+Store the block, room number, capacity, occupancy, availability status, and room allocation records in the database.
+
+---
+
+# 6. Student Room Selection and Allocation
+
+Create a room-selection page for students.
+
+### Step 1: Check profile completion
+
+Before showing rooms, verify that the student has completed all mandatory profile fields.
+
+If the profile is incomplete, show a message and a button to complete the profile.
+
+### Step 2: Determine the correct block
+
+Automatically determine the room block from the student's academic year:
+
+- First Year → Hemavati Block
+- Second Year → Kaveri Block
+- Third Year → Kaveri Block
+- Fourth Year → MCA Block
+
+Students must not be able to select a room in an unauthorized block.
+
+### Step 3: Display available rooms
+
+Show the eligible rooms added by the administrator.
+
+For each room, display:
+- Room number
+- Block name
+- Occupancy, such as 0/2, 1/2, or 2/2
+- Availability status
+- A Select Room button when allocation is permitted
+
+Use clear visual indicators:
+- Available
+- One bed remaining
+- Fully occupied
+- Temporarily unavailable
+
+Only allow a student to select an eligible room with an available bed.
+
+### Step 4: Show roommate details
+
+When a student selects an occupied room with one available bed, display a popup showing the existing roommate's permitted details:
+- Name
+- Profile photo
+- Academic year
+- Branch
+
+Provide Confirm and Cancel options.
+
+After confirmation, allocate the student to that room and update the database.
+
+If a room is empty, allow the student to confirm their selection without showing existing roommate details.
+
+If a room is already occupied by two students, display a message stating that the room is full.
+
+### Step 5: Prevent overbooking
+
+Room allocation must be implemented using a transaction-safe backend operation.
+
+Before saving an allocation, verify that:
+- The student is authenticated.
+- The student's profile is complete.
+- The student is eligible for the block.
+- The student does not already have an active room allocation.
+- The room exists and is available.
+- The room has fewer than two occupants.
+
+Perform the capacity check and allocation atomically so two students cannot claim the same final bed simultaneously.
+
+Once allocated, show the room number and roommate details on the student's dashboard.
+
+Students must not be able to assign themselves to rooms by directly modifying database records.
+
+---
+
+# 7. Student Bills and Payments
+
+Create a Bills and Payments page for each student.
+
+The page must show only the bills associated with the authenticated student's account.
+
+Provide two main bill categories:
+
+1. Room Fee
+2. Mess Fee
+
+For every bill, display:
+- Bill reference number
+- Bill type
+- Billing period
+- Total amount
+- Amount paid
+- Remaining balance
+- Issue date
+- Due date
+- Payment status
+- Administrator's remarks
+
+Use the following payment statuses:
+- Pending
+- Partially Paid
+- Paid
+- Overdue
+
+Calculate the outstanding balance accurately.
+
+For example, if the total bill is ₹10,000 and ₹4,000 has been paid, display ₹6,000 remaining.
+
+The calculation and payment status must be based on verified database records, not values submitted by the student.
+
+## 7.1 Manual Payments
+
+Allow the administrator to record payments received through cash, bank transfer, or another approved offline method.
+
+When recording a manual payment, provide:
+- Student selection
+- Bill selection
+- Amount received
+- Payment date
+- Payment method
+- Transaction or receipt reference, if available
+- Remarks
+
+Update the bill's paid amount and outstanding balance after the payment has been verified and saved.
+
+Maintain a payment history for every bill.
+
+Students should be able to see their recorded manual payments and receipts, if generated.
+
+Do not allow students to mark their own bills as paid.
+
+## 7.2 Online Payments
+
+Integrate a legitimate online payment gateway that supports Indian payments in INR, such as Razorpay or another suitable provider.
+
+Display a **Pay Now** button for eligible outstanding bills.
+
+The online payment flow must work as follows:
+
+1. The student opens their bill.
+2. The student selects Pay Now.
+3. The application creates a payment order through the secure backend.
+4. The payment gateway opens its checkout interface.
+5. The student completes the payment.
+6. The backend verifies the payment using the provider's signature verification and/or verified webhook.
+7. Only after successful verification does the application update the bill and payment history.
+8. The student sees the updated payment status and receipt information.
+
+Security requirements:
+- Never trust a success message coming only from the browser.
+- Never store card numbers, CVVs, UPI PINs, or other sensitive payment credentials.
+- Keep payment gateway secret keys on the server.
+- Prevent duplicate payment processing.
+- Verify webhook signatures.
+- Handle pending, failed, cancelled, and successful transactions.
+- Reconcile payment records without creating duplicate credits.
+- Keep a complete transaction history.
+
+Online payment must remain disabled until the payment gateway credentials and account configuration are completed.
+
+Do not use fake payment success screens or pretend that a transaction has succeeded.
+
+---
+
+# 8. Administrator Bills Management
+
+Create a dedicated Bills Management page in the Administrator Dashboard.
+
+Display students in year-wise sections:
+
+- First Year — Hemavati Block
+- Second Year — Kaveri Block
+- Third Year — Kaveri Block
+- Fourth Year — MCA Block
+
+Allow administrators to:
+- Search by student name.
+- Filter by academic year and block.
+- Filter by room number.
+- Filter by bill type.
+- Filter by payment status.
+- View outstanding balances.
+- View payment history.
+
+When the administrator clicks a student's name, open that student's billing profile.
+
+Display the student's:
+- Name
+- Mobile number
+- Academic year
+- Block and room number
+- Room fee bills
+- Mess fee bills
+- Payments received
+- Outstanding amounts
+- Due dates
+
+Provide an **Add Bill** button.
+
+The administrator can create either a room fee bill or a mess fee bill by entering:
+- Bill type
+- Billing period
+- Amount
+- Due date
+- Remarks
+
+Allow authorized administrators to edit or correct billing information with an audit record.
+
+Bills must be assigned to the correct student's unique account ID, not merely to a student's name.
+
+A student must never see another student's bill.
+
+---
+
+# 9. Actual SMS Bill Reminders
+
+Implement real SMS reminders using a legitimate SMS provider that supports Indian mobile numbers, such as MSG91, Textlocal where available, or another appropriately configured provider.
+
+The actual provider must be selected and configured before sending real messages.
+
+In the Administrator Dashboard, provide a reminder option inside each student's billing profile.
+
+Allow the administrator to choose:
+- Room Fee Reminder
+- Mess Fee Reminder
+- General Payment Reminder
+
+Before sending, display a confirmation containing the student's name, mobile number, bill type, and outstanding amount.
+
+Use a message similar to:
+
+"Dear [Student Name], your [Room/Mess] fee of ₹[Outstanding Amount] for [Billing Period] is pending. Please pay by [Due Date]. For details, log in to the Kalpataru Boys Hostel portal."
+
+The application must:
+- Retrieve the registered mobile number from the database.
+- Calculate the outstanding amount from verified billing records.
+- Send the message through the configured SMS provider using trusted backend logic.
+- Store the reminder date, message type, bill reference, recipient, provider response, and delivery status.
+- Display sending, sent, failed, or delivered status where supported by the provider.
+- Allow authorized administrators to retry failed reminders.
+- Avoid exposing SMS credentials to the browser.
+- Prevent duplicate reminders caused by accidental repeated clicks.
+- Follow applicable Indian SMS regulations, sender-ID requirements, template registration, consent, and provider requirements.
+
+Do not show "SMS sent" merely because the administrator clicked the button. Report the actual result returned by the provider.
+
+If the provider is not configured, display a setup warning and do not pretend to send a message.
+
+Also provide in-app notifications so students can view bill reminders when they log in.
+
+---
+
+# 10. Student Complaints
+
+Create a Complaints page in the Student Dashboard.
+
+Students must be able to submit complaints using:
+- Complaint category
+- Complaint title
+- Description
+- Optional photo attachment
+- Submission date
+
+Suggested categories:
+- Room maintenance
+- Electricity
+- Water supply
+- Bathroom
+- Cleaning
+- Mess food
+- Furniture
+- Other
+
+After submission, generate a complaint reference number and store the complaint in the database.
+
+Display the student's complaint history with:
+- Complaint reference number
+- Title
+- Category
+- Submission date
+- Current status
+- Administrator response
+
+Use these complaint statuses:
+- Submitted
+- In Progress
+- Resolved
+- Rejected
+
+Students can view and track their own complaints but cannot edit administrator decisions or access other students' complaints.
+
+Store complaint photos securely and validate uploaded file types and sizes.
+
+---
+
+# 11. Administrator Complaints Management
+
+Create a Complaints Management page in the Administrator Dashboard.
+
+Display complaints submitted by students.
+
+Provide filters for:
+- Academic year
+- Student name
+- Room number
+- Hostel block
+- Complaint category
+- Complaint status
+- Submission date
+
+When the administrator opens a complaint, show:
+- Student name
+- Student mobile number
+- Academic year and branch
+- Room number and block
+- Complaint description
+- Attached photo, if available
+- Submission date
+- Previous updates
+
+Allow the administrator to:
+- Mark the complaint as In Progress.
+- Add a response.
+- Mark it as Resolved.
+- Reject a complaint with a reason.
+- View complaint history.
+
+Notify the student through in-app notifications when the complaint status changes. Where appropriate, allow SMS notifications using the configured SMS service.
+
+---
+
+# 12. Administrator Dashboard
+
+Create a professional dashboard with a sidebar containing:
+
+1. Dashboard Overview
+2. Student Management
+3. Room Management
+4. Bills Management
+5. Payments and Transactions
+6. Complaints Management
+7. SMS Reminders
+8. Notifications
+9. Logout
+
+Display summary cards for:
+- Total registered students
+- Students by academic year
+- Total rooms
+- Occupied beds
+- Available beds
+- Fully occupied rooms
+- Pending room fee amount
+- Pending mess fee amount
+- Payments received
+- Unresolved complaints
+
+Add tables and charts where useful.
+
+All figures must come from real database records.
+
+Do not display invented statistics or hardcoded sample data as real hostel information.
+
+---
+
+# 13. Student Management
+
+Create a student management page for administrators.
+
+Organize students by academic year and their corresponding hostel blocks.
+
+Display:
+- Student name
+- Profile photo
+- Email
+- Mobile number
+- Academic year
+- Branch
+- Block
+- Room number
+- Roommate
+- Outstanding room fee
+- Outstanding mess fee
+
+Provide search, sorting, and filters.
+
+When an administrator selects a student, open a detailed profile containing the student's permitted information, room allocation, billing records, payments, and complaints.
+
+Allow authorized administrators to update appropriate student records.
+
+Protect sensitive information and prevent unauthorized access.
+
+Do not display passwords or authentication secrets to administrators.
+
+---
+
+# 14. Database Structure
+
+Use Firebase Authentication, Cloud Firestore, Firebase Storage, and secure server-side functions.
+
+Design a clear database structure with suitable collections or equivalent records for:
+
+- `users`
+- `studentProfiles`
+- `adminProfiles`
+- `hostelBlocks`
+- `rooms`
+- `roomAllocations`
+- `bills`
+- `payments`
+- `complaints`
+- `notifications`
+- `smsReminders`
+- `auditLogs`
+
+Use unique document IDs and references to link records correctly.
+
+For example:
+- Every student has a unique authenticated user ID.
+- Every bill belongs to a specific student.
+- Every payment references the appropriate bill.
+- Every room allocation references a student and a room.
+- Every complaint references the student who submitted it.
+- Every SMS reminder references the student and, when relevant, the bill.
+
+Store monetary values consistently, preferably as integer paise for payment calculations, and display amounts in Indian rupees.
+
+Use server timestamps for important transactions.
+
+Create the necessary indexes and database rules.
+
+Do not rely on frontend filtering alone to protect private data.
+
+---
+
+# 15. Security and Access Control
+
+Implement role-based authorization for all pages, API calls, database operations, payment processing, and file access.
+
+### Student permissions
+
+Students may:
+- Read and update their own permitted profile fields.
+- View eligible rooms.
+- Request an eligible room allocation.
+- View their own bills and payments.
+- Make payments for their own outstanding bills.
+- Submit and view their own complaints.
+- Read their own notifications.
+- View permitted roommate details.
+
+Students may not:
+- Change their own role to administrator.
+- Read another student's billing records.
+- Modify another student's profile.
+- Create or edit official bills.
+- Mark their own payments as verified.
+- Override room capacity.
+- Modify administrator-only records.
+- Access secret API credentials.
+
+### Administrator permissions
+
+Authorized administrators may:
+- View and manage student records.
+- Add rooms and maintain room inventory.
+- Manage room allocations.
+- Create and update bills.
+- Record verified manual payments.
+- Review online payment records.
+- Manage complaints.
+- Send SMS reminders.
+- View operational reports.
+
+Protect administrator operations with server-side authorization.
+
+Use Firebase Security Rules and trusted backend functions. Do not leave the database in public read/write mode.
+
+Keep a record of important administrative changes, including bill corrections, room reassignment, and payment adjustments.
+
+---
+
+# 16. Technical Architecture and Setup
+
+Use the following preferred technology stack:
+
+- Frontend: React with TypeScript and a modern responsive UI.
+- Authentication: Firebase Authentication.
+- Database: Cloud Firestore.
+- File storage: Firebase Storage.
+- Backend: Firebase Cloud Functions or another suitable secure server-side runtime.
+- Online payments: Razorpay or another supported payment gateway.
+- SMS: A configured SMS provider supporting Indian numbers.
+- Deployment: A suitable web hosting platform such as Firebase Hosting.
+
+Use environment variables and server-side secret management for sensitive credentials.
+
+The frontend must communicate with trusted backend functions for privileged operations, including:
+- Administrator access-key validation.
+- Room allocation.
+- Bill creation where required.
+- Payment order creation and verification.
+- Payment webhook processing.
+- SMS sending.
+- Other privileged administrative actions.
+
+Do not put server secrets in frontend environment variables with public prefixes.
+
+Use the supported SDK versions and follow the current documentation for each service.
+
+---
+
+# 17. Required Application Pages
+
+Implement all of the following pages:
+
+1. Welcome page
+2. Student registration
+3. Student login
+4. Administrator registration
+5. Administrator login
+6. Password reset
+7. Student dashboard
+8. Student profile
+9. Student room selection
+10. Roommate details popup
+11. Student bills and payments
+12. Online payment checkout flow
+13. Payment result and receipt page
+14. Student complaints
+15. Student notifications
+16. Administrator dashboard
+17. Student management
+18. Room management
+19. Bills management
+20. Payment and transaction management
+21. Complaint management
+22. SMS reminder management
+23. Administrator notification history
+
+Implement loading states, validation, success messages, error messages, and confirmation dialogs.
+
+Use reusable components and a consistent design system.
+
+---
+
+# 18. Implementation and Testing Instructions
+
+Build the project in stages and verify each stage before moving to the next.
+
+### Stage 1: Foundation
+Create the React application, responsive layout, welcome page, navigation, and initial dashboard designs.
+
+### Stage 2: Firebase setup
+Connect Firebase Authentication, Firestore, and Storage. Configure the project and environment variables.
+
+### Stage 3: Authentication and roles
+Implement student registration/login, administrator registration/login, secure administrator-key validation, role-based redirects, and database security rules.
+
+### Stage 4: Student profiles
+Implement profile editing, photo uploads, mandatory-field validation, and profile persistence.
+
+### Stage 5: Room management
+Implement administrator room creation, block assignment, occupancy, and room availability.
+
+### Stage 6: Room allocation
+Implement academic-year restrictions, roommate details, confirmation dialogs, and transaction-safe allocation with a strict two-student limit.
+
+### Stage 7: Bills
+Implement administrator bill creation and the student-specific billing page.
+
+### Stage 8: Payments
+Implement manual payment recording, payment history, online gateway integration, secure verification, and receipts.
+
+### Stage 9: Complaints
+Implement complaint submission, photo attachments, administrator responses, and status tracking.
+
+### Stage 10: SMS reminders
+Configure the SMS provider, implement secure sending, store provider responses, and test actual delivery.
+
+### Stage 11: Testing and deployment
+Test the complete workflow, verify permissions, fix errors, and deploy the application.
+
+Do not stop at generating the frontend. Continue until the backend, database, authentication, and required integrations are implemented or clearly identify any external configuration that remains necessary.
+
+---
+
+# 19. Mandatory Acceptance Tests
+
+Before declaring the application complete, verify the following:
+
+1. A student can register, log in, and log out.
+2. An administrator cannot register with an incorrect access key.
+3. A student cannot access administrator pages or privileged backend functions.
+4. A student must complete their profile before selecting a room.
+5. First-year students see only Hemavati Block rooms.
+6. Second- and third-year students see only Kaveri Block rooms.
+7. Fourth-year students see only MCA Block rooms.
+8. Administrators can create and edit room numbers.
+9. A room can never contain more than two active student allocations.
+10. Concurrent room-selection requests cannot overbook a room.
+11. Students can view only their own bills and payment records.
+12. Administrators can create separate room fee and mess fee bills.
+13. Manual payments update balances correctly.
+14. Online payments update balances only after trusted verification.
+15. Failed or pending payments do not incorrectly mark bills as paid.
+16. Students can submit complaints and see their statuses.
+17. Administrators can update complaints and send responses.
+18. Actual SMS reminders are sent only when the SMS provider is configured.
+19. SMS delivery statuses reflect real provider responses.
+20. Private records and secret keys cannot be accessed through the frontend or unauthorized API requests.
+21. The application works on desktop and mobile screens.
+22. All important data remains available after refreshing the browser or logging out and back in.
+
+---
+
+# 20. Final Delivery Requirements
+
+Deliver a fully functional Kalpataru Boys Hostel Management System with a connected database, secure authentication, separate student and administrator dashboards, year-wise room allocation, two-person room capacity, individual billing, manual and online payments, complaints management, and actual SMS reminders.
+
+Provide:
+- Complete project source code.
+- Clear project folder structure.
+- Firebase setup instructions.
+- Database schema and security rules.
+- Backend functions and deployment instructions.
+- Payment gateway configuration steps.
+- SMS provider configuration steps.
+- A list of required environment variables.
+- Instructions for running the application locally.
+- Instructions for deploying the application.
+- A checklist of any configuration or verification that still requires the project owner's action.
+
+Use beginner-friendly explanations and tell the developer exactly which files to create or edit for each stage.
+
+**Important:** Never claim that authentication, payments, SMS, or database operations work until they have been implemented and tested. If an external account, API credential, billing activation, sender registration, or deployment setting is required, clearly explain what must be configured.
+
+Begin by creating the application foundation and the complete registration/login workflow. Then proceed through the implementation stages in order, preserving the requirements in this specification.
